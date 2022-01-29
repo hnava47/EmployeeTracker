@@ -23,7 +23,8 @@ const getQuestion = () => {
       }
     ]).then(async(response) => {
       if (response.action === 'Quit') {
-        console.log('ok');
+        console.log('Exiting program');
+        process.exit();
       } else if (response.action === 'View All Employees') {
         try {
           await viewEmp();
