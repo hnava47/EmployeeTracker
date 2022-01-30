@@ -102,10 +102,11 @@ const getQuestion = () => {
       } else if (response.action === questions[0]) {
         try {
           await viewEmp();
-          await getQuestion();
         } catch (error) {
           console.log(e);
         }
+
+        await getQuestion();
       } else if (response.action === questions[1]) {
         inquirer
           .prompt([
@@ -127,12 +128,11 @@ const getQuestion = () => {
               const [empByManger] = await connection.query(getEmpByManager);
 
               console.table(empByManger);
-
-              await getQuestion();
             } catch (e) {
               console.log(e);
-              await getQuestion();
             }
+
+            await getQuestion();
           });
       } else if (response.action === questions[2]) {
         inquirer
@@ -149,12 +149,11 @@ const getQuestion = () => {
               const [empByDept] = await connection.query(getEmpByDept, response.department);
 
               console.table(empByDept);
-
-              await getQuestion();
             } catch (e) {
               console.log(e);
-              await getQuestion();
             }
+
+            await getQuestion();
           });
       } else if (response.action === questions[3]) {
         inquirer
@@ -183,21 +182,26 @@ const getQuestion = () => {
             }
           ]).then(async(response) => {
             try {
-              const managerName = response.manager.split(' ');
-              const insertEmp = 'INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES(?, ?, ?, ?);';
+              const insertEmp = 'INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES(?, ?, ?, NULL);';
               const roleIdQuery = 'SELECT id FROM role WHERE title = ?;';
-              const managerIdQuery = 'SELECT id FROM employee WHERE first_name = ? AND last_name = ?;';
-
               const [roleId] = await connection.query(roleIdQuery, response.role);
-              const [managerId] = await connection.query(managerIdQuery, [managerName[0], managerName[1]]);
-              await connection.query(insertEmp, [response.firstName, response.lastName, roleId[0].id, managerId[0].id]);
+
+              if (response.manager === 'None') {
+                await connection.query(insertEmp, [response.firstName, response.lastName, roleId[0].id]);
+              } else {
+                const managerName = response.manager.split(' ');
+                const managerIdQuery = 'SELECT id FROM employee WHERE first_name = ? AND last_name = ?;';
+                const [managerId] = await connection.query(managerIdQuery, [managerName[0], managerName[1]]);
+
+                await connection.query(insertEmp, [response.firstName, response.lastName, roleId[0].id, managerId[0].id]);
+              }
 
               console.log(`Added ${response.firstName} ${response.lastName} to the database`);
-
-              await getQuestion();
             } catch (e) {
               console.log(e);
             }
+
+            await getQuestion();
           });
       } else if (response.action === questions[4]) {
         inquirer
@@ -226,12 +230,11 @@ const getQuestion = () => {
               await connection.query(updateRoleQuery, [roleId[0].id, empId[0].id]);
 
               console.log(`Updated ${response.employee}'s role to ${response.newRole} in the database`);
-
-              await getQuestion();
             } catch (e) {
               console.log(e);
-              await getQuestion();
             }
+
+            await getQuestion();
           });
       } else if (response.action === questions[5]) {
         inquirer
@@ -252,31 +255,64 @@ const getQuestion = () => {
             try {
               const empName = response.employee.split(' ');
               const empIdQuery = 'SELECT id FROM employee WHERE first_name = ? AND last_name = ?;';
+              const [empId] = await connection.query(empIdQuery, [empName[0], empName[1]]);
 
               if (response.newManager === 'None') {
                 const updateRoleQuery = 'UPDATE employee SET manager_id = NULL WHERE id = ?;';
 
-                const [empId] = await connection.query(empIdQuery, [empName[0], empName[1]]);
                 await connection.query(updateRoleQuery, empId[0].id);
               } else {
                 const managerName = response.newManager.split(' ');
                 const updateRoleQuery = 'UPDATE employee SET manager_id = ? WHERE id = ?;';
-
                 const [managerId] = await connection.query(empIdQuery,[managerName[0], managerName[1]]);
-                const [empId] = await connection.query(empIdQuery, [empName[0], empName[1]]);
+
                 await connection.query(updateRoleQuery, [managerId[0].id, empId[0].id]);
               }
 
               console.log(`Updated ${response.employee}'s manager to ${response.newManager} in the database`);
-
-              await getQuestion();
             } catch (e) {
               console.log(e);
-              await getQuestion();
             }
+
+            await getQuestion();
           });
       } else if (response.action === questions[6]) {
+        inquirer
+          .prompt([
+            {
+              type: 'list',
+              message: 'Which employee do you want to delete?',
+              name: 'employee',
+              choices: getEmployees
+            }
+          ]).then(async(response) => {
+            inquirer
+              .prompt([
+                {
+                  type: 'list',
+                  message: `You are about to delete ${response.employee}, are you sure you want to continue?`,
+                  name: 'delete',
+                  choices: ['Yes', 'No']
+                }
+              ]).then(async(resp) => {
+                if (resp.delete === 'Yes') {
+                  try {
+                    const empName = response.employee.split(' ');
+                    const deleteEmp = 'DELETE FROM employee WHERE id = ?;';
+                    const empIdQuery = 'SELECT id FROM employee WHERE first_name = ? AND last_name = ?;';
 
+                    const [empId] = await connection.query(empIdQuery, [empName[0], empName[1]]);
+                    await connection.query(deleteEmp, empId[0].id);
+
+                    console.log(`${response.employee} was deleted from the database`);
+                  } catch (e) {
+                    console.log(e);
+                  }
+                }
+                
+                await getQuestion();
+              })
+          });
       } else if (response.action === questions[7]) {
         try {
           await viewRoles();
