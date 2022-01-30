@@ -309,7 +309,7 @@ const getQuestion = () => {
                     console.log(e);
                   }
                 }
-                
+
                 await getQuestion();
               })
           });
@@ -363,10 +363,11 @@ const getQuestion = () => {
       } else if (response.action === questions[10]) {
         try {
           await viewDept();
-          await getQuestion();
         } catch (e) {
           console.log(e);
         }
+
+        await getQuestion();
       } else if (response.action === questions[11]) {
         inquirer
           .prompt([
@@ -381,11 +382,11 @@ const getQuestion = () => {
               await connection.query(insertDept, response.department);
 
               console.log(`Added ${response.department} to the database`);
-
-              getQuestion();
             } catch (e) {
               console.log(e);
             }
+
+            await getQuestion();
           });
       } else if (response.action === questions[12]) {
 
