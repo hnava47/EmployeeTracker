@@ -2,7 +2,7 @@ const inquirer = require('inquirer');
 const connection = require('./config');
 require('console.table');
 
-const questions = ['View All Employees', 'Add Employee', 'Update Employee Role', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Quit']
+const questions = ['View All Employees', 'View Employees by Manager', 'View Employees by Department', 'Add Employee', 'Update Employee Role', 'Update Employee Manager', 'Delete Employee', 'View All Roles', 'Add Role', 'Delete Role', 'View All Departments', 'Add Department', 'Delete Department', 'View Utilized Budget of Department','Quit']
 
 const getRoles = async() => {
   const getRolesQuery = 'SELECT title FROM role;';
@@ -98,6 +98,36 @@ const getQuestion = () => {
         inquirer
           .prompt([
             {
+              type: 'list',
+              message: 'Select Manager',
+              name: 'manager',
+              choices: getManagers
+            }
+          ]).then(async(response) => {
+            if (response.manager === 'None') {
+              whereClause = 'e.manager_id IS NULL;';
+            } else {
+              whereClause = `CONCAT(m.first_name, " ", m.last_name) = '${response.manager}';`
+            }
+
+            try {
+              const getEmpByManagers = 'SELECT e.id, e.first_name, e.last_name, r.title, d.name department, r.salary, CONCAT(m.first_name, " ", m.last_name) manager FROM role r, department d, employee e LEFT JOIN employee m ON e.manager_id = m.id WHERE e.role_id = r.id AND r.department_id = d.id AND ' + whereClause;
+              const [empByManger] = await connection.query(getEmpByManagers);
+
+              console.table(empByManger);
+
+              await getQuestion();
+            } catch (e) {
+              console.log(e);
+              await getQuestion();
+            }
+          });
+      } else if (response.action === questions[2]) {
+
+      } else if (response.action === questions[3]) {
+        inquirer
+          .prompt([
+            {
               type: 'input',
               message: "What is the employee's first name?",
               name: 'firstName'
@@ -132,21 +162,25 @@ const getQuestion = () => {
 
               console.log(`Added ${response.firstName} ${response.lastName} to the database`);
 
-              getQuestion();
+              await getQuestion();
             } catch (e) {
               console.log(e);
             }
           });
-      } else if (response.action === questions[2]) {
+      } else if (response.action === questions[4]) {
         console.log('test');
-      } else if (response.action === questions[3]) {
+      } else if (response.action === questions[5]) {
+
+      } else if (response.action === questions[6]) {
+
+      } else if (response.action === questions[7]) {
         try {
           await viewRoles();
           await getQuestion();
         } catch (e) {
           console.log(e);
         }
-      } else if (response.action === questions[4]) {
+      } else if (response.action === questions[8]) {
         inquirer
           .prompt([
             {
@@ -166,16 +200,34 @@ const getQuestion = () => {
               choices: getDepartments
             }
           ]).then(async(response) => {
+            if (parseFloat(response.salary) >= 0) {
+              try {
+                const insertRole = 'INSERT INTO role(title, salary, department_id) VALUES(?, ?, ?);';
+                const getDeptId = 'SELECT id FROM department WHERE name = ?;';
 
+                const [deptId] = await connection.query(getDeptId, response.department);
+                await connection.query(insertRole, [response.roleName, response.salary, deptId[0].id]);
+
+                console.log(`Added ${response.roleName} to the database`);
+              } catch (e) {
+                console.log(e);
+              }
+            } else {
+              console.log('error: Salary must be a number greater than or equal to 0');
+            }
+
+            getQuestion();
           });
-      } else if (response.action === questions[5]) {
+      } else if (response.action === questions[9]) {
+
+      } else if (response.action === questions[10]) {
         try {
           await viewDept();
           await getQuestion();
         } catch (e) {
           console.log(e);
         }
-      } else if (response.action === questions[6]) {
+      } else if (response.action === questions[11]) {
         inquirer
           .prompt([
             {
@@ -195,6 +247,10 @@ const getQuestion = () => {
               console.log(e);
             }
           });
+      } else if (response.action === questions[12]) {
+
+      } else if (response.action === questions[13]) {
+
       }
     });
 };
