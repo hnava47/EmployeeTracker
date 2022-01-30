@@ -111,8 +111,8 @@ const getQuestion = () => {
             }
 
             try {
-              const getEmpByManagers = 'SELECT e.id, e.first_name, e.last_name, r.title, d.name department, r.salary, CONCAT(m.first_name, " ", m.last_name) manager FROM role r, department d, employee e LEFT JOIN employee m ON e.manager_id = m.id WHERE e.role_id = r.id AND r.department_id = d.id AND ' + whereClause;
-              const [empByManger] = await connection.query(getEmpByManagers);
+              const getEmpByManager = 'SELECT e.id, e.first_name, e.last_name, r.title, d.name department, r.salary, CONCAT(m.first_name, " ", m.last_name) manager FROM role r, department d, employee e LEFT JOIN employee m ON e.manager_id = m.id WHERE e.role_id = r.id AND r.department_id = d.id AND ' + whereClause;
+              const [empByManger] = await connection.query(getEmpByManager);
 
               console.table(empByManger);
 
@@ -123,7 +123,27 @@ const getQuestion = () => {
             }
           });
       } else if (response.action === questions[2]) {
+        inquirer
+          .prompt([
+            {
+              type: 'list',
+              message: 'Select Department',
+              name: 'department',
+              choices: getDepartments
+            }
+          ]).then(async(response) => {
+            try {
+              const getEmpByDept = 'SELECT e.id, e.first_name, e.last_name, r.title, d.name department, r.salary, CONCAT(m.first_name, " ", m.last_name) manager FROM role r, department d, employee e LEFT JOIN employee m ON e.manager_id = m.id WHERE e.role_id = r.id AND r.department_id = d.id AND d.name = ?';
+              const [empByDept] = await connection.query(getEmpByDept, response.department);
 
+              console.table(empByDept);
+
+              await getQuestion();
+            } catch (e) {
+              console.log(e);
+              await getQuestion();
+            }
+          });
       } else if (response.action === questions[3]) {
         inquirer
           .prompt([
