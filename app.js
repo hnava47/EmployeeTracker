@@ -26,7 +26,23 @@ const getManagers = async() => {
   }
 
   return totalManagers;
-}
+};
+
+const getDepartments = async() => {
+  try {
+    const getDepartmentQuery = 'SELECT * FROM department;';
+    const [departments] = await connection.query(getDepartmentQuery);
+
+    let totalDepts = [];
+    for (let i=0; i<departments.length; i++) {
+      totalDepts.push(departments[i].name.toString());
+    }
+
+    return totalDepts;
+  } catch (e) {
+    console.log(e);
+  }
+};
 
 const viewEmp = async() => {
   try {
@@ -131,7 +147,27 @@ const getQuestion = () => {
           console.log(e);
         }
       } else if (response.action === questions[4]) {
-        console.log('test');
+        inquirer
+          .prompt([
+            {
+              type: 'input',
+              message: 'What is the name of the role?',
+              name: 'roleName'
+            },
+            {
+              type: 'input',
+              message: 'What is the salary of the role?',
+              name: 'salary'
+            },
+            {
+              type: 'list',
+              message: 'Which department does the role belong to?',
+              name: 'department',
+              choices: getDepartments
+            }
+          ]).then(async(response) => {
+
+          });
       } else if (response.action === questions[5]) {
         try {
           await viewDept();
