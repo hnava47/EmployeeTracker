@@ -16,6 +16,18 @@ const getRoles = async() => {
   return totalRoles;
 };
 
+const getEmployees = async() => {
+  const getEmpQuery = 'SELECT CONCAT(first_name, " ", last_name) name FROM employee;';
+  const [employees] = await connection.query(getEmpQuery);
+
+  let totalEmp = [];
+  for (let i=0; i<employees.length; i++) {
+    totalEmp.push(employees[i].name.toString());
+  }
+
+  return totalEmp;
+};
+
 const getManagers = async() => {
   const getManagerQuery = 'SELECT CONCAT(first_name, " ", last_name) name FROM employee;';
   const [managers] = await connection.query(getManagerQuery);
@@ -46,7 +58,7 @@ const getDepartments = async() => {
 
 const viewEmp = async() => {
   try {
-    const getEmpQuery = 'SELECT e.id, e.first_name, e.last_name, r.title, d.name department, r.salary, CONCAT(m.first_name, " ", m.last_name) manager FROM role r, department d, employee e LEFT JOIN employee m ON e.manager_id = m.id WHERE e.role_id = r.id AND r.department_id = d.id;';
+    const getEmpQuery = 'SELECT e.id, e.first_name, e.last_name, r.title, d.name department, r.salary, CONCAT(m.first_name, " ", m.last_name) manager FROM role r, department d, employee e LEFT JOIN employee m ON e.manager_id = m.id WHERE e.role_id = r.id AND r.department_id = d.id ORDER BY e.id;';
     const [employees] = await connection.query(getEmpQuery);
     console.table(employees);
   } catch (e) {
@@ -188,7 +200,39 @@ const getQuestion = () => {
             }
           });
       } else if (response.action === questions[4]) {
-        console.log('test');
+        inquirer
+          .prompt([
+            {
+              type: 'list',
+              message: 'Which employee needs role update?',
+              name: 'employee',
+              choices: getEmployees
+            },
+            {
+              type: 'list',
+              message: "What is the employee's new role?",
+              name: 'newRole',
+              choices: getRoles
+            }
+          ]).then(async(response) => {
+            try {
+              const empName = response.employee.split(' ');
+              const updateRoleQuery = 'UPDATE employee SET role_id = ? WHERE id = ?;';
+              const roleIdQuery = 'SELECT id FROM role WHERE title = ?;';
+              const empIdQuery = 'SELECT id FROM employee WHERE first_name = ? AND last_name = ?;';
+
+              const [roleId] = await connection.query(roleIdQuery, response.newRole);
+              const [empId] = await connection.query(empIdQuery, [empName[0], empName[1]]);
+              await connection.query(updateRoleQuery, [roleId[0].id, empId[0].id]);
+
+              console.log(`Updated ${response.employee}'s role to ${response.newRole} in the database`);
+
+              await getQuestion();
+            } catch (e) {
+              console.log(e);
+              await getQuestion();
+            }
+          });
       } else if (response.action === questions[5]) {
 
       } else if (response.action === questions[6]) {
