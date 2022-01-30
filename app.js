@@ -30,9 +30,29 @@ const getManagers = async() => {
 
 const viewEmp = async() => {
   try {
-    const getEmpQuery = 'SELECT * FROM employee;';
+    const getEmpQuery = 'SELECT e.id, e.first_name, e.last_name, r.title, d.name department, r.salary, CONCAT(m.first_name, " ", m.last_name) manager FROM role r, department d, employee e LEFT JOIN employee m ON e.manager_id = m.id WHERE e.role_id = r.id AND r.department_id = d.id;';
     const [employees] = await connection.query(getEmpQuery);
     console.table(employees);
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+const viewRoles = async() => {
+  try {
+    const getAllRolesQuery = 'SELECT r.id, r.title, r.salary, d.name department FROM role r, department d WHERE r.department_id = d.id;';
+    const [allRoles] = await connection.query(getAllRolesQuery);
+    console.table(allRoles);
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+const viewDept = async() => {
+  try {
+    const getAllDeptQuery = 'SELECT * FROM department;';
+    const [departments] = await connection.query(getAllDeptQuery);
+    console.table(departments);
   } catch (e) {
     console.log(e);
   }
@@ -102,11 +122,24 @@ const getQuestion = () => {
             }
           });
       } else if (response.action === questions[2]) {
-
+        console.log('test');
       } else if (response.action === questions[3]) {
-        
+        try {
+          await viewRoles();
+          await getQuestion();
+        } catch (e) {
+          console.log(e);
+        }
+      } else if (response.action === questions[4]) {
+        console.log('test');
+      } else if (response.action === questions[5]) {
+        try {
+          await viewDept();
+          await getQuestion();
+        } catch (e) {
+          console.log(e);
+        }
       }
-
     });
 };
 
