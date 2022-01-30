@@ -234,7 +234,47 @@ const getQuestion = () => {
             }
           });
       } else if (response.action === questions[5]) {
+        inquirer
+          .prompt([
+            {
+              type: 'list',
+              message: 'Which employee needs manager update?',
+              name: 'employee',
+              choices: getEmployees
+            },
+            {
+              type: 'list',
+              message: "Who is the employee's new manager?",
+              name: 'newManager',
+              choices: getManagers
+            }
+          ]).then(async(response) => {
+            try {
+              const empName = response.employee.split(' ');
+              const empIdQuery = 'SELECT id FROM employee WHERE first_name = ? AND last_name = ?;';
 
+              if (response.newManager === 'None') {
+                const updateRoleQuery = 'UPDATE employee SET manager_id = NULL WHERE id = ?;';
+
+                const [empId] = await connection.query(empIdQuery, [empName[0], empName[1]]);
+                await connection.query(updateRoleQuery, empId[0].id);
+              } else {
+                const managerName = response.newManager.split(' ');
+                const updateRoleQuery = 'UPDATE employee SET manager_id = ? WHERE id = ?;';
+
+                const [managerId] = await connection.query(empIdQuery,[managerName[0], managerName[1]]);
+                const [empId] = await connection.query(empIdQuery, [empName[0], empName[1]]);
+                await connection.query(updateRoleQuery, [managerId[0].id, empId[0].id]);
+              }
+
+              console.log(`Updated ${response.employee}'s manager to ${response.newManager} in the database`);
+
+              await getQuestion();
+            } catch (e) {
+              console.log(e);
+              await getQuestion();
+            }
+          });
       } else if (response.action === questions[6]) {
 
       } else if (response.action === questions[7]) {
