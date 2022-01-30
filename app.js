@@ -139,6 +139,26 @@ const getQuestion = () => {
         } catch (e) {
           console.log(e);
         }
+      } else if (response.action === questions[6]) {
+        inquirer
+          .prompt([
+            {
+              type: 'input',
+              message: 'What is the name of the department?',
+              name: 'department'
+            }
+          ]).then(async(response) => {
+            try {
+              const insertDept = 'INSERT INTO department(name) VALUES(?);';
+              await connection.query(insertDept, response.department);
+
+              console.log(`Added ${response.department} to the database`);
+
+              getQuestion();
+            } catch (e) {
+              console.log(e);
+            }
+          });
       }
     });
 };
