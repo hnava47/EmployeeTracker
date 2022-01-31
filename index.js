@@ -78,7 +78,7 @@ const viewRoles = async() => {
 
 const viewDept = async() => {
   try {
-    const getAllDeptQuery = 'SELECT * FROM department;';
+    const getAllDeptQuery = 'SELECT * FROM department ORDER BY id;';
     const [departments] = await connection.query(getAllDeptQuery);
     console.table(departments);
   } catch (e) {
@@ -421,7 +421,38 @@ const getQuestion = () => {
             await getQuestion();
           });
       } else if (response.action === questions[12]) {
+        inquirer
+          .prompt([
+            {
+              type: 'list',
+              message: 'Which department do you want to delete?',
+              name: 'department',
+              choices: getDepartments
+            }
+          ]).then(async(response) => {
+            inquirer
+              .prompt([
+                {
+                  type: 'list',
+                  message: `You are about to delete ${response.department}, are you sure you want to continue?`,
+                  name: 'delete',
+                  choices: ['Yes', 'No']
+                }
+              ]).then(async(resp) => {
+                if (resp.delete === 'Yes') {
+                  try {
+                    const deleteDept = 'DELETE FROM department WHERE name = ?;';
+                    await connection.query(deleteDept, response.department);
 
+                    console.log(`${response.department} was deleted from the database`);
+                  } catch (e) {
+                    console.log(e);
+                  }
+                }
+
+                await getQuestion();
+              })
+          });
       } else if (response.action === questions[13]) {
 
       }
