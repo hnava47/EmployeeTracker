@@ -19,6 +19,7 @@
   "homepage": "https://github.com/hnava47/EmployeeTracker#readme",
   "dependencies": {
     "console.table": "^0.10.0",
+    "dotenv": "^15.0.0",
     "inquirer": "^8.2.0",
     "mysql2": "^2.3.3"
   }
