@@ -5,39 +5,51 @@ require('console.table');
 const questions = ['View All Employees', 'View Employees by Manager', 'View Employees by Department', 'Add Employee', 'Update Employee Role', 'Update Employee Manager', 'Delete Employee', 'View All Roles', 'Add Role', 'Delete Role', 'View All Departments', 'Add Department', 'Delete Department', 'View Utilized Budget of Department','Quit']
 
 const getRoles = async() => {
-  const getRolesQuery = 'SELECT title FROM role;';
-  const [roles] = await connection.query(getRolesQuery);
+  try {
+    const getRolesQuery = 'SELECT title FROM role;';
+    const [roles] = await connection.query(getRolesQuery);
 
-  let totalRoles = [];
-  for (let i=0; i<roles.length; i++) {
-    totalRoles.push(roles[i].title.toString());
+    let totalRoles = [];
+    for (let i=0; i<roles.length; i++) {
+      totalRoles.push(roles[i].title.toString());
+    }
+
+    return totalRoles;
+  } catch (e) {
+    console.log(e);
   }
-
-  return totalRoles;
 };
 
 const getEmployees = async() => {
-  const getEmpQuery = 'SELECT CONCAT(first_name, " ", last_name) name FROM employee;';
-  const [employees] = await connection.query(getEmpQuery);
+  try {
+    const getEmpQuery = 'SELECT CONCAT(first_name, " ", last_name) name FROM employee;';
+    const [employees] = await connection.query(getEmpQuery);
 
-  let totalEmp = [];
-  for (let i=0; i<employees.length; i++) {
-    totalEmp.push(employees[i].name.toString());
+    let totalEmp = [];
+    for (let i=0; i<employees.length; i++) {
+      totalEmp.push(employees[i].name.toString());
+    }
+
+    return totalEmp;
+  } catch (e) {
+    console.log(e);
   }
-
-  return totalEmp;
 };
 
 const getManagers = async() => {
-  const getManagerQuery = 'SELECT CONCAT(first_name, " ", last_name) name FROM employee;';
-  const [managers] = await connection.query(getManagerQuery);
+  try {
+    const getManagerQuery = 'SELECT CONCAT(first_name, " ", last_name) name FROM employee;';
+    const [managers] = await connection.query(getManagerQuery);
 
-  let totalManagers = ['None'];
-  for (let i=0; i<managers.length; i++) {
-    totalManagers.push(managers[i].name.toString());
+    let totalManagers = ['None'];
+    for (let i=0; i<managers.length; i++) {
+      totalManagers.push(managers[i].name.toString());
+    }
+
+    return totalManagers;
+  } catch (e) {
+    console.log(e);
   }
-
-  return totalManagers;
 };
 
 const getDepartments = async() => {
