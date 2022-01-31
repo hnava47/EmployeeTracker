@@ -68,7 +68,7 @@ const viewEmp = async() => {
 
 const viewRoles = async() => {
   try {
-    const getAllRolesQuery = 'SELECT r.id, r.title, r.salary, d.name department FROM role r, department d WHERE r.department_id = d.id;';
+    const getAllRolesQuery = 'SELECT r.id, r.title, r.salary, d.name department FROM role r, department d WHERE r.department_id = d.id ORDER BY r.id;';
     const [allRoles] = await connection.query(getAllRolesQuery);
     console.table(allRoles);
   } catch (e) {
@@ -316,10 +316,11 @@ const getQuestion = () => {
       } else if (response.action === questions[7]) {
         try {
           await viewRoles();
-          await getQuestion();
         } catch (e) {
           console.log(e);
         }
+
+        await getQuestion();
       } else if (response.action === questions[8]) {
         inquirer
           .prompt([
@@ -359,7 +360,38 @@ const getQuestion = () => {
             getQuestion();
           });
       } else if (response.action === questions[9]) {
+        inquirer
+          .prompt([
+            {
+              type: 'list',
+              message: 'Which role do you want to delete?',
+              name: 'role',
+              choices: getRoles
+            }
+          ]).then(async(response) => {
+            inquirer
+              .prompt([
+                {
+                  type: 'list',
+                  message: `You are about to delete ${response.role}, are you sure you want to continue?`,
+                  name: 'delete',
+                  choices: ['Yes', 'No']
+                }
+              ]).then(async(resp) => {
+                if (resp.delete === 'Yes') {
+                  try {
+                    const deleteRole = 'DELETE FROM role WHERE title = ?;';
+                    await connection.query(deleteRole, response.role);
 
+                    console.log(`${response.role} was deleted from the database`);
+                  } catch (e) {
+                    console.log(e);
+                  }
+                }
+
+                await getQuestion();
+              })
+          });
       } else if (response.action === questions[10]) {
         try {
           await viewDept();
