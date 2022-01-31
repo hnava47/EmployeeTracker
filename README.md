@@ -14,6 +14,7 @@
     <summary>Table of Contents</summary>
     <ol>
         <li><a href="#about-the-project">About The Project</a></li>
+        <li><a href="#demonstration">Demonstration</a></li>
         <li><a href="#contact">Contact</a></li>
     </ol>
 </details>
@@ -44,12 +45,18 @@ The actions supported by the employee management system include the following:
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
+## Demonstration
+![Demo][demo-video]
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
 ## Contact
 Hector Nava - hector.r.nava44@gmail.com
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
+[demo-video]: ./assets/img/EmployeeSystemDemo.gif
 [view-screenshot]: ./assets/img/view_screenshot.png
 [primary-screenshot]: ./assets/img/primary_screenshot.png
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
