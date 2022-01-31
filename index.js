@@ -97,7 +97,7 @@ const getQuestion = () => {
       }
     ]).then(async(response) => {
       if (response.action === 'Quit') {
-        console.log('Exiting program');
+        console.log('Exiting program, have a good day!');
         process.exit();
       } else if (response.action === questions[0]) {
         try {
