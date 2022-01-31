@@ -454,7 +454,26 @@ const getQuestion = () => {
               })
           });
       } else if (response.action === questions[13]) {
+        inquirer
+          .prompt([
+            {
+              type: 'list',
+              message: 'Which department budget do you want to view?',
+              name: 'department',
+              choices: getDepartments
+            }
+          ]).then(async(response) => {
+            try {
+              const budgetQuery = 'SELECT d.name department, SUM(r.salary) emp_salaries FROM department d, role r, employee e WHERE d.id = r.department_id AND r.id = e.role_id and d.name = ?;'
+              const [deptBudget] = await connection.query(budgetQuery, response.department);
 
+              console.table(deptBudget);
+            } catch (e) {
+              console.log(e);
+            }
+
+            await getQuestion();
+          });
       }
     });
 };
